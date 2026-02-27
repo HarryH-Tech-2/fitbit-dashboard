@@ -12,18 +12,20 @@ interface Props {
   onDisconnect: () => void;
 }
 
-const redirectUrl = window.location.origin + window.location.pathname;
+const baseUrl = window.location.origin + window.location.pathname;
+const termsUrl = window.location.origin + '/terms.html';
+const privacyUrl = window.location.origin + '/privacy.html';
 
 const REGISTRATION_FIELDS = [
   { label: 'Application Name', hint: 'e.g. "My Workout Timer"' },
   { label: 'Description', hint: 'e.g. "Interval timer with heart rate tracking"' },
-  { label: 'Application Website URL', hint: redirectUrl },
+  { label: 'Application Website URL', hint: baseUrl, copyable: true },
   { label: 'Organization', hint: 'Your name or organization' },
-  { label: 'Organization Website URL', hint: redirectUrl },
-  { label: 'Terms of Service URL', hint: redirectUrl },
-  { label: 'Privacy Policy URL', hint: redirectUrl },
+  { label: 'Organization Website URL', hint: baseUrl, copyable: true },
+  { label: 'Terms of Service URL', hint: termsUrl, copyable: true },
+  { label: 'Privacy Policy URL', hint: privacyUrl, copyable: true },
   { label: 'OAuth 2.0 Application Type', hint: 'Select "Personal"', important: true },
-  { label: 'Redirect URL', hint: redirectUrl, copyable: true, important: true },
+  { label: 'Redirect URL', hint: baseUrl, copyable: true, important: true },
 ] as const;
 
 function CopyButton({ text }: { text: string }) {
