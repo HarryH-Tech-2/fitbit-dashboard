@@ -20,7 +20,6 @@ import { TimerControls } from './TimerControls';
 import { WorkoutSummaryModal } from './WorkoutSummaryModal';
 import { HeartRateDisplay } from '../heartrate/HeartRateDisplay';
 import { HeartRateZoneBadge } from '../heartrate/HeartRateZoneBadge';
-import { BluetoothConnectButton } from '../heartrate/BluetoothConnectButton';
 import { HeartRateChart } from '../heartrate/HeartRateChart';
 
 const DANGER_BPM = 175;
