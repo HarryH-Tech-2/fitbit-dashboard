@@ -16,7 +16,7 @@ const baseUrl = window.location.origin + window.location.pathname;
 const termsUrl = window.location.origin + '/terms.html';
 const privacyUrl = window.location.origin + '/privacy.html';
 
-const REGISTRATION_FIELDS = [
+const REGISTRATION_FIELDS: { label: string; hint: string; copyable?: boolean; important?: boolean }[] = [
   { label: 'Application Name', hint: 'e.g. "My Workout Timer"' },
   { label: 'Description', hint: 'e.g. "Interval timer with heart rate tracking"' },
   { label: 'Application Website URL', hint: baseUrl, copyable: true },
@@ -26,7 +26,7 @@ const REGISTRATION_FIELDS = [
   { label: 'Privacy Policy URL', hint: privacyUrl, copyable: true },
   { label: 'OAuth 2.0 Application Type', hint: 'Select "Personal"', important: true },
   { label: 'Redirect URL', hint: baseUrl, copyable: true, important: true },
-] as const;
+];
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
