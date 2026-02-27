@@ -7,6 +7,7 @@ const SCOPES = 'heartrate profile';
 const STORAGE_KEY = 'fitbit-tokens';
 const VERIFIER_KEY = 'fitbit-pkce-verifier';
 const CLIENT_ID_KEY = 'fitbit-client-id';
+const CLIENT_SECRET_KEY = 'fitbit-client-secret';
 
 function generateRandomString(length: number): string {
   const arr = new Uint8Array(length);
@@ -32,6 +33,14 @@ export function getStoredClientId(): string {
 
 export function setStoredClientId(id: string): void {
   localStorage.setItem(CLIENT_ID_KEY, id);
+}
+
+export function getStoredClientSecret(): string {
+  return localStorage.getItem(CLIENT_SECRET_KEY) ?? '';
+}
+
+export function setStoredClientSecret(secret: string): void {
+  localStorage.setItem(CLIENT_SECRET_KEY, secret);
 }
 
 export function getStoredTokens(): FitbitTokens | null {
@@ -69,13 +78,14 @@ export async function startAuthFlow(clientId: string): Promise<void> {
   window.location.href = `${FITBIT_AUTH_URL}?${params}`;
 }
 
-export async function handleOAuthCallback(code: string, clientId: string): Promise<FitbitTokens> {
+export async function handleOAuthCallback(code: string, clientId: string, clientSecret: string): Promise<FitbitTokens> {
   const verifier = localStorage.getItem(VERIFIER_KEY);
   if (!verifier) throw new Error('PKCE verifier not found');
   localStorage.removeItem(VERIFIER_KEY);
 
   const body = new URLSearchParams({
     client_id: clientId,
+    client_secret: clientSecret,
     grant_type: 'authorization_code',
     redirect_uri: REDIRECT_URI,
     code,
@@ -84,10 +94,7 @@ export async function handleOAuthCallback(code: string, clientId: string): Promi
 
   const res = await fetch(FITBIT_TOKEN_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${btoa(clientId + ':')}`,
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
 
@@ -108,19 +115,17 @@ export async function handleOAuthCallback(code: string, clientId: string): Promi
   return tokens;
 }
 
-export async function refreshAccessToken(clientId: string, refreshToken: string): Promise<FitbitTokens> {
+export async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string): Promise<FitbitTokens> {
   const body = new URLSearchParams({
     client_id: clientId,
+    client_secret: clientSecret,
     grant_type: 'refresh_token',
     refresh_token: refreshToken,
   });
 
   const res = await fetch(FITBIT_TOKEN_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${btoa(clientId + ':')}`,
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
 

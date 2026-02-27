@@ -30,8 +30,10 @@ export function SettingsScreen() {
         connected={fitbit.connected}
         profile={fitbit.profile}
         clientId={fitbit.clientId}
+        clientSecret={fitbit.clientSecret}
         error={fitbit.error}
         onClientIdChange={fitbit.setClientId}
+        onClientSecretChange={fitbit.setClientSecret}
         onConnect={fitbit.connect}
         onDisconnect={fitbit.disconnect}
       />

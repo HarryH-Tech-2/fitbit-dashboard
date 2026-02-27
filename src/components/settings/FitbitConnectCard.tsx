@@ -6,8 +6,10 @@ interface Props {
   connected: boolean;
   profile: FitbitProfile | null;
   clientId: string;
+  clientSecret: string;
   error: string | null;
   onClientIdChange: (id: string) => void;
+  onClientSecretChange: (secret: string) => void;
   onConnect: () => void;
   onDisconnect: () => void;
 }
@@ -53,8 +55,10 @@ export function FitbitConnectCard({
   connected,
   profile,
   clientId,
+  clientSecret,
   error,
   onClientIdChange,
+  onClientSecretChange,
   onConnect,
   onDisconnect,
 }: Props) {
@@ -128,7 +132,7 @@ export function FitbitConnectCard({
               </div>
 
               <p className="text-[11px] text-slate-500">
-                After registering, copy the <strong className="text-slate-400">Client ID</strong> and paste it below.
+                After registering, copy the <strong className="text-slate-400">Client ID</strong> and <strong className="text-slate-400">Client Secret</strong> and paste them below.
               </p>
             </div>
           )}
@@ -140,9 +144,16 @@ export function FitbitConnectCard({
             placeholder="Fitbit Client ID (e.g. 23ABCD)"
             className="w-full rounded-lg bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-slate-600"
           />
+          <input
+            type="password"
+            value={clientSecret}
+            onChange={(e) => onClientSecretChange(e.target.value)}
+            placeholder="Fitbit Client Secret"
+            className="w-full rounded-lg bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-slate-600"
+          />
           <button
             onClick={onConnect}
-            disabled={!clientId}
+            disabled={!clientId || !clientSecret}
             className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 active:scale-95 transition-transform"
           >
             <Link size={14} />

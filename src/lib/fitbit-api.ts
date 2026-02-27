@@ -7,12 +7,13 @@ async function apiFetch(
   url: string,
   tokens: FitbitTokens,
   clientId: string,
+  clientSecret: string,
 ): Promise<Response> {
   let accessToken = tokens.accessToken;
 
   // Refresh if expired
   if (Date.now() >= tokens.expiresAt - 60_000) {
-    const newTokens = await refreshAccessToken(clientId, tokens.refreshToken);
+    const newTokens = await refreshAccessToken(clientId, clientSecret, tokens.refreshToken);
     storeTokens(newTokens);
     accessToken = newTokens.accessToken;
   }
@@ -22,8 +23,8 @@ async function apiFetch(
   });
 }
 
-export async function getProfile(tokens: FitbitTokens, clientId: string): Promise<FitbitProfile> {
-  const res = await apiFetch(`${BASE_URL}/1/user/-/profile.json`, tokens, clientId);
+export async function getProfile(tokens: FitbitTokens, clientId: string, clientSecret: string): Promise<FitbitProfile> {
+  const res = await apiFetch(`${BASE_URL}/1/user/-/profile.json`, tokens, clientId, clientSecret);
   if (!res.ok) throw new Error('Failed to fetch profile');
   const data = await res.json();
   return {
@@ -35,12 +36,13 @@ export async function getProfile(tokens: FitbitTokens, clientId: string): Promis
 export async function getIntradayHR(
   tokens: FitbitTokens,
   clientId: string,
+  clientSecret: string,
   date: string,
   startTime: string,
   endTime: string,
 ): Promise<FitbitIntradayHR[]> {
   const url = `${BASE_URL}/1/user/-/activities/heart/date/${date}/1d/1sec/time/${startTime}/${endTime}.json`;
-  const res = await apiFetch(url, tokens, clientId);
+  const res = await apiFetch(url, tokens, clientId, clientSecret);
   if (!res.ok) throw new Error('Failed to fetch intraday HR');
   const data = await res.json();
   return data['activities-heart-intraday']?.dataset ?? [];
