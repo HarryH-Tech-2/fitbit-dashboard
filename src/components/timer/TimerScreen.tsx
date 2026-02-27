@@ -144,18 +144,6 @@ export function TimerScreen() {
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-6">
-      {/* HR Connection */}
-      {timer.state.status === 'idle' && (
-        <BluetoothConnectButton
-          connected={hr.connected}
-          connecting={hr.connecting}
-          supported={hr.supported}
-          error={hr.error}
-          onConnect={hr.connect}
-          onDisconnect={hr.disconnect}
-        />
-      )}
-
       {/* Heart Rate Display */}
       {liveHR.connected && liveHR.bpm !== null && (
         <div className="flex flex-col items-center gap-1">
