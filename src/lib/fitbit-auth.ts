@@ -3,7 +3,7 @@ import type { FitbitTokens } from '../types/fitbit';
 const FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize';
 const TOKEN_PROXY_URL = '/api/fitbit-token';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
-const SCOPES = 'heartrate profile';
+const SCOPES = 'heartrate profile activity';
 const STORAGE_KEY = 'fitbit-tokens';
 const VERIFIER_KEY = 'fitbit-pkce-verifier';
 const CLIENT_ID_KEY = 'fitbit-client-id';
