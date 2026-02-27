@@ -84,7 +84,10 @@ export async function handleOAuthCallback(code: string, clientId: string): Promi
 
   const res = await fetch(FITBIT_TOKEN_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${btoa(clientId + ':')}`,
+    },
     body,
   });
 
@@ -114,7 +117,10 @@ export async function refreshAccessToken(clientId: string, refreshToken: string)
 
   const res = await fetch(FITBIT_TOKEN_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${btoa(clientId + ':')}`,
+    },
     body,
   });
 
