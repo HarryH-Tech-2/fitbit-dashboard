@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useWorkoutContext } from '../../context/WorkoutContext';
 import { useTimer } from '../../hooks/useTimer';
 import { useHeartRate } from '../../hooks/useHeartRate';
+import { useFitbitHR } from '../../hooks/useFitbitHR';
 import { useAudio } from '../../hooks/useAudio';
 import { useVibration } from '../../hooks/useVibration';
 import { useWakeLock } from '../../hooks/useWakeLock';
@@ -21,6 +22,8 @@ import { HeartRateZoneBadge } from '../heartrate/HeartRateZoneBadge';
 import { BluetoothConnectButton } from '../heartrate/BluetoothConnectButton';
 import { HeartRateChart } from '../heartrate/HeartRateChart';
 
+const DANGER_BPM = 175;
+
 export function TimerScreen() {
   const { settings } = useWorkoutContext();
   const audio = useAudio();
@@ -28,6 +31,20 @@ export function TimerScreen() {
   const wakeLock = useWakeLock();
   const { save } = useWorkoutStorage();
   const hr = useHeartRate(settings.hrZoneConfig);
+  const fitbitHR = useFitbitHR(settings.hrZoneConfig, true);
+
+  // Use Bluetooth HR if connected, otherwise fall back to Fitbit polling
+  const liveHR = useMemo(() => {
+    if (hr.connected) {
+      return { bpm: hr.currentBPM, readings: hr.readings, zone: hr.zone, connected: true, source: 'ble' as const };
+    }
+    if (fitbitHR.connected && fitbitHR.currentBPM !== null) {
+      return { bpm: fitbitHR.currentBPM, readings: fitbitHR.readings, zone: fitbitHR.zone, connected: true, source: 'fitbit' as const };
+    }
+    return { bpm: null, readings: [] as HeartRateReading[], zone: null, connected: false, source: null };
+  }, [hr.connected, hr.currentBPM, hr.readings, hr.zone, fitbitHR.connected, fitbitHR.currentBPM, fitbitHR.readings, fitbitHR.zone]);
+
+  const isDanger = (liveHR.bpm ?? 0) >= DANGER_BPM;
 
   const [completedWorkout, setCompletedWorkout] = useState<WorkoutRecord | null>(null);
   const workoutStartRef = useRef<number>(0);
@@ -131,11 +148,16 @@ export function TimerScreen() {
       )}
 
       {/* Heart Rate Display */}
-      {hr.connected && (
+      {liveHR.connected && (
         <div className="flex items-center gap-3">
-          <HeartRateDisplay bpm={hr.currentBPM} connected={hr.connected} />
-          <HeartRateZoneBadge zone={hr.zone} />
+          <HeartRateDisplay bpm={liveHR.bpm} connected={liveHR.connected} dangerThreshold={DANGER_BPM} />
+          <HeartRateZoneBadge zone={liveHR.zone} />
         </div>
+      )}
+
+      {/* Fitbit HR source label */}
+      {liveHR.source === 'fitbit' && liveHR.bpm !== null && timer.state.status === 'idle' && (
+        <span className="text-[10px] text-teal-500 -mt-4">via Fitbit</span>
       )}
 
       {/* Phase Label */}
@@ -145,8 +167,9 @@ export function TimerScreen() {
       <CountdownRing
         progress={timer.state.status === 'idle' ? 0 : timer.progress}
         phaseType={timer.currentPhase?.type ?? null}
+        danger={isDanger}
       >
-        <div className="text-5xl font-bold tabular-nums tracking-tight">
+        <div className={`text-5xl font-bold tabular-nums tracking-tight ${isDanger ? 'text-red-300' : ''}`}>
           {formatTime(timer.remainingInPhase)}
         </div>
         <div className="text-sm text-slate-400 mt-1">
@@ -164,9 +187,9 @@ export function TimerScreen() {
       )}
 
       {/* HR Sparkline */}
-      {hr.readings.length > 1 && timer.state.status !== 'idle' && (
+      {liveHR.readings.length > 1 && timer.state.status !== 'idle' && (
         <HeartRateChart
-          readings={hr.readings}
+          readings={liveHR.readings}
           zoneConfig={settings.hrZoneConfig}
           width={280}
           height={50}

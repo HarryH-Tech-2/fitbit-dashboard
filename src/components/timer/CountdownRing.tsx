@@ -4,6 +4,7 @@ import type { PhaseType } from '../../types/timer';
 interface Props {
   progress: number;
   phaseType: PhaseType | null;
+  danger?: boolean;
   size?: number;
   strokeWidth?: number;
   children?: React.ReactNode;
@@ -12,6 +13,7 @@ interface Props {
 export function CountdownRing({
   progress,
   phaseType,
+  danger = false,
   size = 280,
   strokeWidth = 8,
   children,
@@ -19,10 +21,13 @@ export function CountdownRing({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - progress);
-  const color = phaseType ? phaseColor(phaseType) : '#64748b';
+  const color = danger ? '#ef4444' : phaseType ? phaseColor(phaseType) : '#64748b';
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className={`relative flex items-center justify-center ${danger ? 'animate-danger-ring' : ''}`}
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
