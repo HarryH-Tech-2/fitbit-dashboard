@@ -88,8 +88,11 @@ export async function handleOAuthCallback(code: string, clientId: string): Promi
     body,
   });
 
-  if (!res.ok) throw new Error('Token exchange failed');
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.errors?.[0]?.message || data?.error_description || 'Token exchange failed';
+    throw new Error(msg);
+  }
 
   const tokens: FitbitTokens = {
     accessToken: data.access_token,
