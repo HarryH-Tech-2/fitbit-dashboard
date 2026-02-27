@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zone-below: #3b82f6;
+  --color-zone-target: #22c55e;
+  --color-zone-above: #ef4444;
+  --color-warmup: #f59e0b;
+  --color-interval: #ef4444;
+  --color-recovery: #3b82f6;
+  --color-cooldown: #8b5cf6;
+}
+
+@keyframes pulse-hr {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.animate-pulse-hr {
+  animation: pulse-hr 0.8s ease-in-out infinite;
+}

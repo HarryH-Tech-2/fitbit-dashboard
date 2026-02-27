@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <rect width="192" height="192" rx="32" fill="#0f172a"/>
+  <text x="96" y="80" text-anchor="middle" font-family="system-ui" font-size="48" font-weight="bold" fill="#ef4444">4×4</text>
+  <circle cx="96" cy="130" r="24" stroke="#ef4444" stroke-width="4" fill="none" opacity="0.3"/>
+  <circle cx="96" cy="130" r="24" stroke="#ef4444" stroke-width="4" fill="none" stroke-dasharray="150.8" stroke-dashoffset="37.7" stroke-linecap="round" transform="rotate(-90 96 130)"/>
+</svg>
