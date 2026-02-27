@@ -1,7 +1,7 @@
 import type { FitbitTokens } from '../types/fitbit';
 
 const FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize';
-const FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token';
+const TOKEN_PROXY_URL = '/api/fitbit-token';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES = 'heartrate profile';
 const STORAGE_KEY = 'fitbit-tokens';
@@ -83,19 +83,17 @@ export async function handleOAuthCallback(code: string, clientId: string, client
   if (!verifier) throw new Error('PKCE verifier not found');
   localStorage.removeItem(VERIFIER_KEY);
 
-  const body = new URLSearchParams({
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: 'authorization_code',
-    redirect_uri: REDIRECT_URI,
-    code,
-    code_verifier: verifier,
-  });
-
-  const res = await fetch(FITBIT_TOKEN_URL, {
+  const res = await fetch(TOKEN_PROXY_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: REDIRECT_URI,
+      code,
+      code_verifier: verifier,
+    }),
   });
 
   const data = await res.json();
@@ -116,17 +114,15 @@ export async function handleOAuthCallback(code: string, clientId: string, client
 }
 
 export async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string): Promise<FitbitTokens> {
-  const body = new URLSearchParams({
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-  });
-
-  const res = await fetch(FITBIT_TOKEN_URL, {
+  const res = await fetch(TOKEN_PROXY_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }),
   });
 
   if (!res.ok) throw new Error('Token refresh failed');
