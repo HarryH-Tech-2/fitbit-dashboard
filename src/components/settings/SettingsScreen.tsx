@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react';
 import { useWorkoutContext } from '../../context/WorkoutContext';
 import { useFitbit } from '../../hooks/useFitbit';
 import { MaxHRSetting } from './MaxHRSetting';
@@ -34,6 +35,27 @@ export function SettingsScreen() {
         onConnect={fitbit.connect}
         onDisconnect={fitbit.disconnect}
       />
+      <div className="flex items-center justify-center gap-4 pt-2 text-xs text-slate-500">
+        <a
+          href="/privacy.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 hover:text-slate-300 transition-colors"
+        >
+          Privacy Policy
+          <ExternalLink size={10} />
+        </a>
+        <span>·</span>
+        <a
+          href="/terms.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 hover:text-slate-300 transition-colors"
+        >
+          Terms of Service
+          <ExternalLink size={10} />
+        </a>
+      </div>
     </div>
   );
 }
