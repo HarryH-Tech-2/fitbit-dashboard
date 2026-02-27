@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { Loader } from 'lucide-react';
 import { useWorkoutContext } from '../../context/WorkoutContext';
 import { useTimer } from '../../hooks/useTimer';
 import { useHeartRate } from '../../hooks/useHeartRate';
@@ -24,6 +25,14 @@ import { HeartRateChart } from '../heartrate/HeartRateChart';
 
 const DANGER_BPM = 175;
 
+function timeAgo(ts: number): string {
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 10) return 'just now';
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  return `${min}m ago`;
+}
+
 export function TimerScreen() {
   const { settings } = useWorkoutContext();
   const audio = useAudio();
@@ -36,13 +45,13 @@ export function TimerScreen() {
   // Use Bluetooth HR if connected, otherwise fall back to Fitbit polling
   const liveHR = useMemo(() => {
     if (hr.connected) {
-      return { bpm: hr.currentBPM, readings: hr.readings, zone: hr.zone, connected: true, source: 'ble' as const };
+      return { bpm: hr.currentBPM, readings: hr.readings, zone: hr.zone, connected: true, source: 'ble' as const, lastUpdated: null as number | null, polling: false };
     }
-    if (fitbitHR.connected && fitbitHR.currentBPM !== null) {
-      return { bpm: fitbitHR.currentBPM, readings: fitbitHR.readings, zone: fitbitHR.zone, connected: true, source: 'fitbit' as const };
+    if (fitbitHR.connected) {
+      return { bpm: fitbitHR.currentBPM, readings: fitbitHR.readings, zone: fitbitHR.zone, connected: true, source: 'fitbit' as const, lastUpdated: fitbitHR.lastUpdated, polling: fitbitHR.polling };
     }
-    return { bpm: null, readings: [] as HeartRateReading[], zone: null, connected: false, source: null };
-  }, [hr.connected, hr.currentBPM, hr.readings, hr.zone, fitbitHR.connected, fitbitHR.currentBPM, fitbitHR.readings, fitbitHR.zone]);
+    return { bpm: null, readings: [] as HeartRateReading[], zone: null, connected: false, source: null, lastUpdated: null as number | null, polling: false };
+  }, [hr.connected, hr.currentBPM, hr.readings, hr.zone, fitbitHR.connected, fitbitHR.currentBPM, fitbitHR.readings, fitbitHR.zone, fitbitHR.lastUpdated, fitbitHR.polling]);
 
   const isDanger = (liveHR.bpm ?? 0) >= DANGER_BPM;
 
@@ -148,16 +157,26 @@ export function TimerScreen() {
       )}
 
       {/* Heart Rate Display */}
-      {liveHR.connected && (
-        <div className="flex items-center gap-3">
-          <HeartRateDisplay bpm={liveHR.bpm} connected={liveHR.connected} dangerThreshold={DANGER_BPM} />
-          <HeartRateZoneBadge zone={liveHR.zone} />
+      {liveHR.connected && liveHR.bpm !== null && (
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-3">
+            <HeartRateDisplay bpm={liveHR.bpm} connected={liveHR.connected} dangerThreshold={DANGER_BPM} />
+            <HeartRateZoneBadge zone={liveHR.zone} />
+          </div>
+          {liveHR.source === 'fitbit' && (
+            <span className="text-[10px] text-slate-500">
+              via Fitbit · {liveHR.lastUpdated ? timeAgo(liveHR.lastUpdated) : 'syncing...'}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Fitbit HR source label */}
-      {liveHR.source === 'fitbit' && liveHR.bpm !== null && timer.state.status === 'idle' && (
-        <span className="text-[10px] text-teal-500 -mt-4">via Fitbit</span>
+      {/* Fitbit waiting state */}
+      {liveHR.source === 'fitbit' && liveHR.bpm === null && (
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Loader size={12} className="animate-spin" />
+          Waiting for Fitbit heart rate data...
+        </div>
       )}
 
       {/* Phase Label */}
@@ -187,7 +206,7 @@ export function TimerScreen() {
       )}
 
       {/* HR Sparkline */}
-      {liveHR.readings.length > 1 && timer.state.status !== 'idle' && (
+      {liveHR.readings.length > 1 && (
         <HeartRateChart
           readings={liveHR.readings}
           zoneConfig={settings.hrZoneConfig}
